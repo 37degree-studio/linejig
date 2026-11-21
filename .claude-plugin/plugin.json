@@ -1,0 +1,7 @@
+{
+  "name": "linejig",
+  "description": "An agent skill for interactive 3D line illustrations in three.js, for Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, Windsurf and other coding agents: empty states, 404s, onboarding and heroes.",
+  "version": "0.2.2",
+  "license": "MIT",
+  "homepage": "https://linejig.com/skill"
+}

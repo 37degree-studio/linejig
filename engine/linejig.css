@@ -1,0 +1,21 @@
+/* Linejig: the one palette for every illustration, white and black (drawing.md section 6): hi > edge > mid > lo
+   against the plate. Linked in each figure's head so the plate colour is there before the first paint; the kernel
+   links it itself if a page forgets. */
+/* the plate sits a touch off the page in both themes (#f7f7f8 on white, #111111 on near-black) so a figure lifts off it */
+:root { --plate: #f7f7f8; --hi: #17171a; --edge: #6a6a72; --mid: #8f8f97; --lo: #b6b6bc; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; } }
+:root[data-theme="dark"] { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--plate); }
+main { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }   /* the canvas fills the window */
+#plate { flex: none; }
+#plate canvas { display: block; touch-action: none; }
+.embed #plate canvas { touch-action: pan-y; }          /* embedded: a vertical swipe still scrolls the page */
+.turntable #plate canvas { touch-action: auto; }
+/* the brand style (styles.md): defaults for orange; the kernel derives every --accent-* tone from the brand colour */
+:root { --accent-top: #f5821f; --accent-side: #e0560f; --accent-edge: #ffa45a; --accent-tint: #fef3ea; --accent-glow: #f5821f; --glow-alpha: 0.12; --label-hero: #ffffff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-edge: #ffb36b; --accent-tint: #332213; --glow-alpha: 0.42; } }
+:root[data-theme="dark"] { --accent-edge: #ffb36b; --accent-tint: #332213; --glow-alpha: 0.42; }
+/* brand on the dark plate: greys a step under lineart (edge 4.5:1, mid 3:1 on #111), so the colour still leads */
+@media (prefers-color-scheme: dark) { :root[data-style="brand"]:not([data-theme="light"]) { --edge: #7c7c7c; --mid: #606060; --lo: #4a4a4a; } }
+:root[data-style="brand"][data-theme="dark"] { --edge: #7c7c7c; --mid: #606060; --lo: #4a4a4a; }
