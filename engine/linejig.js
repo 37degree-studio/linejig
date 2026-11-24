@@ -1,4 +1,4 @@
-/* Linejig engine. Copyright 2026 Linejig. MIT licence (the free core: line art). Everything a figure shares, so a
+/* Linejig engine. Copyright 2026 Linejig. MIT licence, like every style file beside it. Everything a figure shares, so a
    figure file holds only its model, its ASSEMBLY table and its HERO handlers. three.js 0.160.0 with Line2 fat lines; the
    page needs the import map for 'three' and 'three/addons/'.
 
@@ -21,42 +21,51 @@
      place(K, bucket, st) => { off: [x, y, z], show, alpha },   // optional: move, hide or fade (alpha 0..1) a bucket without a rebuild
      HERO: { onHover(id, p), onLeave(id), onClick(id, p), action: 'compose', opened(st, K) },
      turntable: 'swing' | 'full',             // ?mode=turntable: 'swing' is +-35 degrees over 40 s, 'full' one turn in 40 s
+     glow: false | 0..1,                      // optional: the style's hero glow off, or scaled (default 1; ?glow=0..1 wins)
      onLive(K), onReplay(K), onState(value, K) (a host's {type: 'state', value} message: a figure's own named state),
    });
 
    Drawing (K): K.P(x, y, z) projects to plate units; K.axes(o, U, V, W) is a frame; K.rrect / K.circ / K.box / K.turn
-   make footprints (rings of { u, v, nu, nv }); K.solid(F, [ring, inner], w0, w1, silTone, creaseTone) is a prism with
-   its silhouette and one crease; K.add(fill, lines, tone, { dash, fine, at, drawn, fillTone }) adds a raw primitive.
+   make footprints (rings of { u, v, nu, nv }); K.solid(F, [ring, inner], w0, w1, silTone, creaseTone, o) is a prism with
+   its silhouette and one crease (o: add's options, on both); K.add(fill, lines, tone, { dash, fine, at, drawn, fillTone }) adds a raw primitive.
    Tones: 'hi' 'edge' 'mid' 'lo'; a trailing '~' is the thin 0.5 px line. fine: shown only when the drawing is 320 px
    or wider. at: its draw-on start (ms). drawn: its fill appears as it starts drawing. fillTone: a filled dot.
+   fillTone: 'ink' is the one fixed tone: near-black (--ink) in both themes, with a lighter edge on a dark plate
+   (--ink-edge); every style honours it on any part, never in the brand colour, never the hero (a style may restyle it
+   with ink(p) => { fill, top, line }).
    K.layer(name, { side, i, bucket }) files what follows under an ASSEMBLY row; bucket names a part that moves alone.
    Clocks: K.tween (700 ms, .32,.72,0,1), K.TW, K.inout, K.spring(x, m), K.step(sp, dt), K.springAt(x0, target, ms, m)
    (k 100, c 18). Hand: K.pointer (plate units), K.hover (hit id or null), K.onPlane(p, o, n), K.near(from, deg).
-   Style: style: 'lineart' (default) | 'brand' | 'dots' (aliases 'line', 'accent'); brand: { color: '#hex', color2? } (orange default).
+   Style: style: 'lineart' (default) | 'brand' | 'dots' | 'readout' | 'pencil' (aliases 'line', 'accent'); brand: { color: '#hex', color2? } (orange default).
    STYLE_NAMES lists the style ids; STYLES maps every name (aliases too) to its rules. Line art lives in this file.
-   Brand and Dots are Linejig Pro and live in linejig-pro.js (beside this file, not MIT): a figure that asks for one (style
+   Every other style is an add-on, one file per style beside this file, MIT like it: Brand and Dots in linejig-pro.js,
+   Readout in styles/readout.js, Pencil in styles/pencil.js (loadStyle(name) imports one); Block, styles/block.js, is
+   still in the works and served only from linejig.com. A figure that asks for one (style
    option, ?style=, a style message, or a brand or dots option) imports it once, on demand; until it arrives the figure
    draws line art, and if it cannot load it stays in line art (one console warning). A page that imports linejig-pro.js
-   itself has the Pro styles at once. registerStyle(name, rules, aliases) adds a style; registerExtension(ext) adds the
+   itself has Brand and Dots at once. registerStyle(name, rules, aliases) adds a style; registerExtension(ext) adds the
    per-figure hooks a style needs beyond its rules (linejig-pro.js uses both).
-   Dots (Pro): the drawing in a screen-space grid of dots (6 px cells); the hero's dots take the brand colour; dots near the pointer
+   Dots: the drawing in a screen-space grid of dots (3.5 px cells by default, finer on a small object); the hero's dots take the brand colour; dots near the pointer
    swell. dots: { shape, cell, size, gap, contrast, threshold, angle, swell, radius, faces, jitter, heroOnly, tint, across }
    (DOTS, DOTS_RANGE, exported by linejig-pro.js). registerDotShape(name, glsl) (linejig-pro.js) adds a shape by name (GLSL
    that sets d; see DOT_SHAPES). tint: true draws every mark in the brand colour (full strength for edges, lighter on white
    or dimmer on black for detail and faces); across: about how many cells span the object when the cell adapts to its size (auto).
+   Add-ons (one file per feature, beside this file, loaded only when used): shadow (addons/shadow.js) is asked for with
+   shadow: true, ?shadow=1 or {type: 'shadow', value}; fitShadow: true also fits the plate round the shadow of the fit points
+   along light (fig.light or LIGHT). An add-on registers an extension like a style and takes its option through option(k, v).
    Grid: grid: true draws a floor grid under the object that fades out by distance and turns with it (off by default).
    Accent fade: when a part gains or loses the hero or outline accent its colours and glow tween (220 ms in, 260 out),
    with no rebuild of its geometry; a style switch crossfades over 300 ms; reduced motion switches at once.
-   Hooks: ?freeze=MS, ?reduced=1, ?theme=light|dark, ?intro=draw|stack|none, ?style=lineart|brand|dots, ?brand=hex (&brand2=hex),
-   ?embed=1, ?mode=turntable, ?grid=1|0, ?dots=shape:square,cell:8, ?dpr=N (else min(devicePixelRatio, 2), lowered on slow frames),
+   Hooks: ?freeze=MS, ?reduced=1, ?theme=light|dark, ?intro=draw|stack|none, ?style=lineart|brand|dots|readout, ?brand=hex (&brand2=hex),
+   ?embed=1, ?mode=turntable, ?grid=1|0, ?glow=0..1, ?dots=shape:square,cell:8, ?dpr=N (else min(devicePixelRatio, 2), lowered on slow frames),
    ?click=ID@MS (clicks hero member ID at MS, for capture of the click state and the action).
    Embed: in {type: 'replay' | 'reset' | 'theme' | 'intro' | 'mode' | 'style' | 'brand' | 'grid' | 'dots' | 'state', value} (dots: a partial
    settings object, merged; null resets), {type: 'pause' | 'resume'}, and {type: 'click', id?} (the hero's click as a pointer press would: id defaults to the
    hero; {type: 'intro', value: 'none'} jumps to the finished figure). Frames render only while something moves;
    the loop sleeps when still, wakes on input or a message, and pauses while the document is hidden. (brand: '#hex' or
-   {color, color2}); out {type: 'ready', id, intros, styles, style, brand, action} (styles: every style id, the Pro ones
-   loading on demand; a figure that opens in a Pro style sends it once linejig-pro.js has arrived, with style and dots
-   set; dots is null while the Pro file is not loaded), then {type: 'drawn', id} once, when the
+   {color, color2}); out {type: 'ready', id, intros, styles, style, brand, action} (styles: every style id, the add-on ones
+   loading on demand; a figure that opens in an add-on style sends it once that file has arrived, with style and dots
+   set; dots is null while linejig-pro.js is not loaded), then {type: 'drawn', id} once, when the
    first frame with the figure in it has been drawn in its own style (a host can swap its poster for the live plate then), and
    {type: 'action', id, figure} when a hero with an action reaches its open state (standalone: a 'linejig:action'
    CustomEvent on window, detail { id, figure }). Keyboard: a figure with HERO.action, interactive and taking pointer
@@ -124,14 +133,20 @@ const inside = (pt, poly) => { let c = false; for (let i = 0, j = poly.length - 
 // or a part added with { accent: 'outline' }.
 // fill(p): the tone of its fill; top(p): a second tone for the visible cap of a solid (two-tone shade), or null;
 // dot(p): the tone of a filled dot; line(p): the tone of its lines ('~' keeps the thin width); label(p): a label's tone.
-// glow: a soft halo behind each hero bucket; text: labels may be drawn; fade: plate-edge fade in px when there is context.
+// glow: a soft halo behind each hero bucket (a figure's glow option scales it: X.glow); text: labels may be drawn; fade: plate-edge fade in px when there is context.
+// ink (optional): ink(p) => { fill, top, line } restyles a part with fillTone 'ink' (p.ink; default: fill 'ink', line 'ink-edge').
+// width (optional): { line, thin, scale } the style's two line widths in CSS px (line art: 1 and 0.5); scale: true reads them
+// at a 400 px plate and scales them with the drawing. prims(list, kit) (optional): rewrites the primitive list in painter's
+// order once per build (a solid's prism is on p.o.solid); kit: { P, at3, ringAt, DV, dot, hull, inside, faces, run }.
 // References: styles.md. The rules for the look live here (and in linejig-pro.js), never in a figure file.
 // lineart: white and black, no colour, no text. The old name line is an alias of the same object. Brand (alias accent)
 // and Dots register themselves from linejig-pro.js.
 const lineart = { fill: () => 'plate', top: () => null, dot: (p) => p.o.fillTone, line: (p) => p.tone, label: () => 'mid', glow: false, text: false, fade: 0 };
 export const STYLES = { lineart, line: lineart };
-export const STYLE_NAMES = ['lineart', 'brand', 'dots'];   // the style ids (STYLES also holds the aliases); brand and dots load on demand
-const PRO = { names: ['brand', 'accent', 'dots'], url: new URL('./linejig-pro.js', import.meta.url).href, p: null, ok: false, failed: false };
+export const STYLE_NAMES = ['lineart', 'brand', 'dots', 'readout', 'pencil', 'block'];   // the style ids (STYLES also holds the aliases); all but lineart load on demand
+// the add-on styles: one file per style (Brand and Dots share linejig-pro.js), imported once, the first time a figure asks for it
+const ADDON = (f) => ({ url: new URL(f, import.meta.url).href, p: null, ok: false, failed: false });
+const PRO = ADDON('./linejig-pro.js'), FILES = { brand: PRO, accent: PRO, dots: PRO, readout: ADDON('./styles/readout.js'), pencil: ADDON('./styles/pencil.js'), block: ADDON('./styles/block.js') };
 /** Adds a style by name (and its aliases): rules as above. A style with per-figure needs also registers an extension. */
 export function registerStyle(name, rules, aliases = []) {
   for (const k of [name, ...aliases]) STYLES[k] = rules;
@@ -139,15 +154,27 @@ export function registerStyle(name, rules, aliases = []) {
   return name;
 }
 // extensions: { mount(X) => hooks } per figure; X is the figure's internal kit (mount(), "the extension kit"), hooks are
-// called where a style needs more than its rules: brand(plate), paint(plate), tone(k), glowMesh(...), labelMesh(...),
-// draw(vp), busy(), setDots(v), dots(), exportBegin(), exportEnd(), captureBegin(clear), built(), dispose()
+// called where a style needs more than its rules: brand(plate), paint(plate), tone(k), glowMesh(...), labelMesh(...), primMesh(p, z, N, t0),
+// primLines(p, lines, z, N, startOf, TW) (a style draws a primitive's lines itself: meshes for its bucket; the engine then skips them),
+// draw(vp), busy(), setDots(v), dots(), exportBegin(), exportEnd(), captureBegin(clear), built(), dispose(),
+// trace() (true: P records each plate point's world point for this build, X.world(pt)), pose(t, whole, stk) (after each pose;
+// a bucket group's world offset is g.userData.wo), option(k, v) (an add-on's option or message)
 const EXTS = [], MOUNTS = new Set();
 export function registerExtension(ext) { if (EXTS.includes(ext)) return; EXTS.push(ext); for (const attach of MOUNTS) attach(); }
-/** Imports linejig-pro.js once (resolved beside this file); resolves true once its styles are registered, false if it failed. */
-export function loadPro() {
-  return PRO.p ||= import(PRO.url).then((m) => { m.install?.(CORE); PRO.ok = true; return true; },
-    (e) => { PRO.failed = true; console.warn('Linejig: the Pro styles (linejig-pro.js) did not load, so this figure stays in line art.', e); return false; });
+/** Imports a style's add-on file once (resolved beside this file); resolves true once its styles are registered, false if it failed. */
+export function loadStyle(name) {
+  const F = FILES[name]; if (!F) return Promise.resolve(!!STYLES[name]);
+  return F.p ||= import(F.url).then((m) => { m.install?.(CORE); F.ok = true; return true; },
+    (e) => { F.failed = true; console.warn(`Linejig: the ${name} style (${F.url.split('/').pop()}) did not load, so this figure stays in line art.`, e); return false; });
 }
+// the feature add-ons, by option name: imported once, when a figure first turns one on
+const ADDONS = { shadow: ADDON('./addons/shadow.js') };
+export function loadAddon(name) {
+  const F = ADDONS[name]; return F.p ||= import(F.url).then((m) => { m.install?.(CORE); return F.ok = true; }, (e) => { console.warn(`Linejig: the ${name} add-on did not load.`, e); return false; });
+}
+export const LIGHT = [0.47, 0.88, 1.5];                       // the default light: the world direction toward it, in front of the object, above and a little left, so shadows fall behind
+/** Imports linejig-pro.js once (Brand and Dots). */
+export const loadPro = () => loadStyle('brand');
 const hex3 = (h) => { h = String(h || '').trim().replace(/^#/, ''); if (/^[0-9a-f]{3}$/i.test(h)) h = h.replace(/./g, (c) => c + c); return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toLowerCase() : null; };
 // the small helpers a style file builds on, so it carries no copies of its own
 export const STYLE_KIT = { clamp, hull, hex3, RAD, bez };
@@ -190,12 +217,14 @@ function mount(fig, host) {
   const ASSEMBLY = fig.ASSEMBLY || [{ name: 'all', from: [0, 0, 1] }];
   const STK = { travel: 20, stagger: 160, inRow: 0, ...(fig.stack || {}) };
   const RELEASE = fig.release ?? 1200, LIVE_AT = fig.liveAt ?? 2900, HERO = fig.HERO || {};
-  let STYLE, WANT = null;                                      // WANT: a Pro style asked for before linejig-pro.js arrived
+  const GLOWK = ((v) => v === false ? 0 : Number.isFinite(+v) ? clamp(+v) : 1)(Q.has('glow') ? Q.get('glow') : fig.glow ?? 1);   // the style's glow, scaled
+  let STYLE, WANT = null;                                      // WANT: an add-on style asked for before its file arrived
   const setStyle = (s) => { STYLE = (typeof s === 'object' && s) || STYLES[s] || STYLES.lineart; root.dataset.style = STYLE_NAMES.find((k) => STYLES[k] === STYLE) || 'custom'; };
-  const isPro = (s) => typeof s === 'string' && !STYLES[s] && PRO.names.includes(s);   // a Pro style, not loaded yet
-  const S0 = STYLES[Q.get('style')] || PRO.names.includes(Q.get('style')) ? Q.get('style') : fig.style || 'lineart';   // lineart is the default
-  setStyle(isPro(S0) ? 'lineart' : S0); if (isPro(S0)) useStyle(S0);   // line art until the Pro file is in
+  const isPro = (s) => typeof s === 'string' && !STYLES[s] && !!FILES[s];   // an add-on style, not loaded yet
+  const S0 = STYLES[Q.get('style')] || FILES[Q.get('style')] ? Q.get('style') : fig.style || 'lineart';   // lineart is the default
+  setStyle(isPro(S0) ? 'lineart' : S0); if (isPro(S0)) useStyle(S0);   // line art until the style's file is in
   if (fig.brand || fig.dots) loadPro();
+  for (const k in ADDONS) if (Q.has(k) ? Q.get(k) === '1' : fig[k]) loadAddon(k);
   // the brand colour: brand: { color, color2 }, ?brand=hex (or %23hex), or a {type: 'brand', value} message
   const BR = { color: hex3(fig.brand?.color) || '#f5821f', color2: hex3(fig.brand?.color2) };
   const setBrand = (v) => { const o = typeof v === 'object' && v ? v : { color: v }; const c = hex3(o.color); if (!c) return false;
@@ -209,7 +238,8 @@ function mount(fig, host) {
   let S = 1, OX = 0, OY = 0, cs, sn, KE, ZF, DV = [0, 0, 1], W = 1, H = 1, PW = 1, CW = VW, CH = VH, FINE = true;
   const setView = (az, el) => { const a = az * RAD, e = el * RAD; cs = Math.cos(a); sn = Math.sin(a); KE = Math.sin(e); ZF = Math.cos(e); DV = [sn * ZF, cs * ZF, KE]; };
   setView(REST.az, REST.el);
-  const P = (x, y, z) => { const X = x * cs - y * sn, Y = x * sn + y * cs; return [OX + S * X, OY + S * (Y * KE - z * ZF)]; };
+  let P3 = null;                                              // trace: plate point -> world point, for one build
+  const P = (x, y, z) => { const X = x * cs - y * sn, Y = x * sn + y * cs, r = [OX + S * X, OY + S * (Y * KE - z * ZF)]; P3?.set(r, [x, y, z]); return r; };
   const axes = (o, U = [1, 0, 0], V = [0, 1, 0], Wd = [0, 0, 1]) => ({ o, U, V, W: Wd });
   const at3 = (F, u, v, w) => [0, 1, 2].map((i) => F.o[i] + u * F.U[i] + v * F.V[i] + w * F.W[i]);
   const world = (F, ring, w) => ring.map((q) => at3(F, q.u, q.v, w));
@@ -231,10 +261,10 @@ function mount(fig, host) {
   }
   const within = (name, fn, o) => { const c = CUR; layer(name, o); fn(); CUR = c; };
   const add = (fill, lines, tone, o = {}) => prims.push({ fill, lines, tone, o, ...CUR });
-  function solid(F, [ring, inner], w0, w1, silTone = 'edge', creaseTone = 'mid') {
+  function solid(F, [ring, inner], w0, w1, silTone = 'edge', creaseTone = 'mid', o = {}) {
     const sil = hull(ringAt(F, ring, w0).concat(ringAt(F, ring, w1)));
-    add(sil, [{ pts: sil, closed: true }], silTone, { top: ringAt(F, ring, dot(F.W, DV) >= 0 ? w1 : w0) });   // top: the visible cap, for two-tone styles
-    if (inner) add(null, [{ pts: ringAt(F, run(inner, faces(F)), dot(F.W, DV) >= 0 ? w1 : w0) }], creaseTone);
+    add(sil, [{ pts: sil, closed: true }], silTone, { ...o, top: ringAt(F, ring, dot(F.W, DV) >= 0 ? w1 : w0), solid: { F, ring, w0, w1 } });   // top: the visible cap, for two-tone styles; solid: the prism, for a style extension (primMesh)
+    if (inner) add(null, [{ pts: ringAt(F, run(inner, faces(F)), dot(F.W, DV) >= 0 ? w1 : w0) }], creaseTone, o);
     return sil;
   }
   const hit = (id, poly) => hits.push({ id, poly, layer: CUR.layer });
@@ -317,7 +347,9 @@ function mount(fig, host) {
 
   // ---------- fit: the most extreme pose at the given share of the plate, centred ----------
   const CTR = fig.center || [0, 0, 0];
-  const fitBox = () => { const ps = fig.fit.points(K).map((q) => P(...q)), xs = ps.map((p) => p[0]), ys = ps.map((p) => p[1]);
+  const fitPts = (K) => { const p = fig.fit.points(K), l = fig.light || LIGHT;   // fitShadow: with the fit points' shadows on the ground
+    return fig.fitShadow ? p.concat(p.map((q) => [q[0] - l[0] * q[2] / l[2], q[1] - l[1] * q[2] / l[2], 0])) : p; };
+  const fitBox = () => { const ps = fitPts(K).map((q) => P(...q)), xs = ps.map((p) => p[0]), ys = ps.map((p) => p[1]);
     return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]; };
   let [x0, x1, y0, y1] = fitBox();
   S = Math.min((fig.fit.width ?? 0.7) * VW / (x1 - x0), (fig.fit.height ?? Infinity) * VH / (y1 - y0));
@@ -340,9 +372,11 @@ function mount(fig, host) {
   // EXTRA: materials an extension put in the scene (glows, labels): recoloured by userData.tone, faded by userData.fk
   const fills = {}, mats = {}, EXTRA = new Set();
   const fillMat = (t = 'plate') => fills[t] || (fills[t] = Object.assign(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 }), { userData: { tone: t } }));
+  // a style's line widths (style.width); LWK: the drawing's scale for a style whose widths scale with it (widths())
+  let LWK = 1; const lw = (thin) => (thin ? STYLE.width?.thin ?? 0.5 : STYLE.width?.line ?? 1) * (STYLE.width?.scale ? LWK : 1);
   const lineMat = (t, dash) => { const key = t + (dash ? '-' : '');
-    if (!mats[key]) { const thin = t.endsWith('~'), m = new LineMaterial({ linewidth: thin ? 0.5 : 1, worldUnits: false, dashed: !!dash });
-      m.userData = { tone: t.replace('~', ''), dash: !!dash }; m.resolution.set(W, H); m.color.set(tone(m.userData.tone)); mats[key] = m; }
+    if (!mats[key]) { const thin = t.endsWith('~'), m = new LineMaterial({ linewidth: lw(thin), worldUnits: false, dashed: !!dash });
+      m.userData = { tone: t.replace('~', ''), dash: !!dash, thin }; m.resolution.set(W, H); m.color.set(tone(m.userData.tone)); mats[key] = m; }
     return mats[key]; };
   // ---------- the accent fade: per part, a hero amount h and an outline amount o (0..1) on a sine in-out, 220 ms in, 260 out ----------
   // A part is one ASSEMBLY row, index and bucket (a label: its text). While a part fades, its fills, caps, lines, label
@@ -364,7 +398,8 @@ function mount(fig, host) {
   const partMat = (key, s, make) => { let e = PM.get(key); if (!e) { const m = make(); m.userData.fk = parseSpec(s); PM.set(key, e = { m }); } e.used = true; tint(e.m); return e.m; };
   const fillFor = (t) => t[0] !== '@' ? fillMat(t) : partMat(t, t, () => new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 }));
   const lineFor = (t, dash) => t[0] !== '@' ? lineMat(t, dash) : partMat(t + (dash ? '-' : ''), t, () => {
-    const m = new LineMaterial({ linewidth: parseSpec(t).g.endsWith('~') ? 0.5 : 1, worldUnits: false, dashed: !!dash }); m.resolution.set(W, H); m.userData.dash = !!dash; return m; });
+    const thin = parseSpec(t).g.endsWith('~'), m = new LineMaterial({ linewidth: lw(thin), worldUnits: false, dashed: !!dash }); m.resolution.set(W, H); m.userData.dash = !!dash; m.userData.thin = thin; return m; });
+  const widths = (k = LWK) => { LWK = k; for (const m of lineMats()) if (m !== GRID.mat) m.linewidth = lw(!!m.userData.thin); };
   const lineMats = function* () { yield* Object.values(mats); yield GRID.mat; for (const e of PM.values()) if (e.m.isLineMaterial) yield e.m; };
   // ---------- the floor grid: 0.5 px lines in lo on the ground (z 0) under the object, fading out by distance ----------
   // Off by default (grid: true, ?grid=1|0, {type: 'grid', value}). About 2.2 times the object's footprint, cells about an
@@ -397,6 +432,7 @@ function mount(fig, host) {
     hook('brand', pl);                                        // the brand tones, written as CSS variables (linejig-pro.js)
     TC.clear();
     for (const m of [...Object.values(fills), ...Object.values(mats)]) m.color.set(tone(m.userData.tone));
+    widths();
     for (const m of EXTRA) if (m.userData.tone) m.color.set(tone(m.userData.tone));
     CLEAR = tone('plate'); if (!STAGED) renderer.setClearColor(CLEAR, 1);   // opaque on the plate colour, so the overlay layer of the glow has a base to work on
     hook('paint', pl);
@@ -443,16 +479,19 @@ function mount(fig, host) {
   function build(st, perPart) {
     paint(); aim(); prims = []; hits = []; CUR = { layer: 0, i: 0, bucket: 'static', from: ASSEMBLY[0].from };
     layer(ASSEMBLY[0].name); context('back'); layer(ASSEMBLY[0].name);
+    P3 = hook('trace') ? new WeakMap() : null;
     fig.model(K, st);
     layer(ASSEMBLY[0].name); context('front');
     for (const l of fig.labels || []) { layer(l.layer || ASSEMBLY[0].name); label(typeof l.frame === 'function' ? l.frame(K, st) : axes(...l.frame), l.text, ...l.at, l); }
-    for (const p of prims) { p.hero = p.o.hero ?? (!!ASSEMBLY[p.layer].hero || p.tone === 'hi');   // the hero: its ASSEMBLY row says hero: true
-      p.outline = !p.hero && (p.o.accent === 'outline' || !!ASSEMBLY[p.layer].outline); }   // the one secondary part: accent edges, a dark tint, no glow
+    for (const p of prims) { p.ink = p.o.fillTone === 'ink'; p.hero = !p.ink && (p.o.hero ?? (!!ASSEMBLY[p.layer].hero || p.tone === 'hi'));   // the hero: its ASSEMBLY row says hero: true (never ink)
+      p.outline = !p.hero && !p.ink && (p.o.accent === 'outline' || !!ASSEMBLY[p.layer].outline); }   // the one secondary part: accent edges, a dark tint, no glow
+    if (STYLE.prims) prims = STYLE.prims(prims, { P, at3, ringAt, DV, dot, hull, inside, faces, run });   // a style may rewrite the list (new prims keep their source's layer, i, bucket, hero)
     // the fade: a part whose level (2 hero, 1 outline, 0 grey) changed tweens its amounts; while it does, each of its
     // prims carries a spec '@part^grey^outline^hero' per surface instead of one tone. The tones it is leaving are the
     // ones it last showed, so a fade starts from exactly what was on screen.
     const lv = (p) => p.hero ? 2 : p.outline ? 1 : 0, T = K.t, parts = new Map();
-    const shown = (p) => ({ fill: p.o.fillTone ? STYLE.dot(p) : STYLE.fill(p), top: STYLE.top(p), line: STYLE.line(p), label: STYLE.label(p) });
+    const shown = (p) => p.ink ? { fill: 'ink', top: null, line: 'ink-edge' + (p.tone.endsWith('~') ? '~' : ''), label: 'mid', ...STYLE.ink?.(p) }
+      : { fill: p.o.fillTone ? STYLE.dot(p) : STYLE.fill(p), top: STYLE.top(p), line: STYLE.line(p), label: STYLE.label(p) };
     for (const p of prims) { const k = p.part = p.o.label ? 'label:' + p.o.label.text : p.layer + ':' + p.i + ':' + p.bucket;
       const e = parts.get(k) || parts.set(k, { L: 0, n: 0 }).get(k); e.L = Math.max(e.L, lv(p)); p.ord = e.n++; }
     for (const [k, e] of parts) {
@@ -478,11 +517,11 @@ function mount(fig, host) {
     const N = prims.length, B = new Map();
     prims.forEach((p, o) => {
       const key = perPart && p.bucket === 'static' ? p.layer + ':' + p.i + ':' + p.from : p.bucket;
-      if (!B.has(key)) B.set(key, { fill: {}, timed: [], tones: {}, labels: [], glow: new Map(), layer: p.layer, i: p.i, from: p.from, bucket: p.bucket });
-      const b = B.get(key), zf = -9 + 18 * o / N, zl = zf + 9 / N;
+      if (!B.has(key)) B.set(key, { fill: {}, timed: [], tones: {}, labels: [], glow: new Map(), xm: [], layer: p.layer, i: p.i, from: p.from, bucket: p.bucket });
+      const b = p.b = B.get(key), zf = -9 + 18 * o / N, zl = zf + 9 / N;   // p.b.g: the primitive's group, once built
       if (p.o.label) { const v = VX && { k: 'label', z: zf + 6 / N, b, text: p.o.label.text }; if (v) VX.push(v); b.labels.push([p, zf + 6 / N, spec(p, 'label'), v]); return; }
       const pl = p.lines.filter((l) => l.pts.length > 1);
-      const t0 = p.o.at ?? (pl.length ? SPREAD * (Math.min(...pl.map((l) => minX(l.pts))) - X0) / (X1 - X0 || 1) : 0);
+      const t0 = p.t0 = p.o.at ?? (pl.length ? SPREAD * (Math.min(...pl.map((l) => minX(l.pts))) - X0) / (X1 - X0 || 1) : 0);
       if (p.fill && p.fill.length > 2) {
         const ft = spec(p, 'fill'), tt = spec(p, 'top'), F = parts.get(p.part).F;
         const late = p.o.drawn || p.o.fillTone || p.o.at != null || F.shown[p.ord].fill !== 'plate';   // a coloured fill arrives as its outline starts
@@ -492,10 +531,13 @@ function mount(fig, host) {
         if (tt && p.o.top?.length > 2) { b.timed.push({ tri: tris(p.o.top, zf + 4 / N, []), t: t0, tone: tt, grad: STYLE.grad && p.hero && tt[0] !== '@' });   // the two-tone cap
           if (VX) VX.push({ k: 'fill', pts: p.o.top, tone: tt, t: t0, z: zf + 4 / N, b }); }
         const fg = glowing(p, ft);                            // a fading part's glow is its own, keyed by when its fade started
-        if (STYLE.glow && (p.hero || fg)) { const gk = fg ? F.h.t0 + '/' + F.h.to : '', G = b.glow.get(gk) || b.glow.set(gk, { pts: [], z: Infinity, t: Infinity, fk: fg ? { k: p.part, glow: true } : null }).get(gk);
+        if (STYLE.glow && GLOWK > 0 && (p.hero || fg)) { const gk = fg ? F.h.t0 + '/' + F.h.to : '', G = b.glow.get(gk) || b.glow.set(gk, { pts: [], z: Infinity, t: Infinity, fk: fg ? { k: p.part, glow: true } : null }).get(gk);
           G.pts.push(...p.fill); G.z = Math.min(G.z, zf - 1 / N); G.t = Math.min(G.t, t0); }
       }
-      for (const l of pl) {
+      if (p.fill && p.fill.length > 2) { const xm = hook('primMesh', p, zf, N, t0); if (xm) for (const m of xm) { m.userData.t = t0; b.xm.push(m); } }   // a style extension's own meshes for this primitive
+      const own = pl.length && !VX ? hook('primLines', p, pl, zl, N, (l) => p.o.at ?? SPREAD * (minX(l.pts) - X0) / (X1 - X0 || 1), TW) : undefined;   // a style may draw a primitive's lines itself
+      if (own) for (const m of own) { m.userData.t ??= t0; b.xm.push(m); }
+      else for (const l of pl) {
         const n = l.pts.length - (l.closed ? 0 : 1), lt0 = p.o.at ?? SPREAD * (minX(l.pts) - X0) / (X1 - X0 || 1);
         const k = spec(p, 'line') + '|' + (p.o.dash ? 'd' : '') + '|' + (p.o.fine ? 'f' : ''), arr = b.tones[k] || (b.tones[k] = []);
         const times = [], un = untweens(n);
@@ -512,6 +554,7 @@ function mount(fig, host) {
       const g = b.g = new THREE.Group(); g.userData = { k: b.layer, i: b.i, from: b.from, bucket: b.bucket, timed: [] };
       for (const G of b.glow.values()) for (const m of hook('glowMesh', G.pts, G.z, G.fk, 0.5 / N) || []) { m.userData.t = G.t; g.add(m); g.userData.timed.push(m); }   // it arrives with the hero
       for (const [t, arr] of Object.entries(b.fill)) if (arr.length) g.add(mesh(arr, t));
+      for (const m of b.xm) { g.add(m); g.userData.timed.push(m); }
       for (const tf of b.timed) { const m = mesh(tf.tri, tf.tone, tf.grad); m.userData.t = tf.t; g.add(m); g.userData.timed.push(m); }
       for (const [p, z, ls, v] of b.labels) { const m = hook('labelMesh', p, z, ls); if (!m) continue; if (v) v.mesh = m; g.add(m); }
       for (const [k, arr] of Object.entries(b.tones)) {
@@ -523,7 +566,7 @@ function mount(fig, host) {
       body.add(g); groups.push(g);
     }
     for (const [k, e] of PM) if (!e.used) { e.m.dispose(); PM.delete(k); }
-    hook('built');
+    hook('built'); P3 = null;
     objHull = null;                                          // the object's outline, for the grab cursor: made on the first hover that needs it
     paint();
   }
@@ -541,6 +584,7 @@ function mount(fig, host) {
     cam.left = V.cx.x - w / 2; cam.right = V.cx.x + w / 2; cam.top = -(V.cy.x - h / 2); cam.bottom = -(V.cy.x + h / 2); cam.updateProjectionMatrix();
     for (const m of lineMats()) if (m.userData.dash) { m.dashSize = 1.6 * VW / (PW * z); m.gapSize = 3.2 * VW / (PW * z); }
     FINE = 0.7 * PW * z >= 320;                               // fine lines only when the drawing is 320 px or wider
+    widths(PW * z / VW);
   }
   function fade() {                                         // the style's plate-edge fade, only when the figure has context
     if (STAGED) return;                                       // staged: no per-plate mask yet
@@ -744,10 +788,11 @@ function mount(fig, host) {
     }
     for (const g of groups) {
       const { k, i, from, bucket, timed } = g.userData, e = stk ? layerE(k, i, t) : 1;
-      let [dx, dy] = e >= 0 && e < 1 ? shiftOf(from.map((c) => c * STK.travel * (1 - e))) : [0, 0];
+      const wo = g.userData.wo = e >= 0 && e < 1 ? from.map((c) => c * STK.travel * (1 - e)) : [0, 0, 0];   // the bucket's world offset
+      let [dx, dy] = shiftOf(wo);
       let show = e >= 0;
       if (bucket !== 'static' && fig.place) { const pl = fig.place(K, bucket, st);
-        if (pl) { if (pl.off) { const [ox, oy] = shiftOf(pl.off); dx += ox; dy += oy; } if (pl.show === false) show = false; g.userData.alpha = pl.alpha ?? 1; } }
+        if (pl) { if (pl.off) { const [ox, oy] = shiftOf(pl.off); dx += ox; dy += oy; for (let j = 0; j < 3; j++) wo[j] += pl.off[j]; } if (pl.show === false) show = false; g.userData.alpha = pl.alpha ?? 1; } }
       g.visible = show; g.position.set(dx, dy, 0);
       for (const m of timed) m.visible = whole || t >= m.userData.t;
     }
@@ -757,11 +802,12 @@ function mount(fig, host) {
       for (const k of done) ANIM.delete(k);
     }
     for (const g of groups) if (g.visible && (g.userData.alpha < 1 || g.userData.faded)) fadeGroup(g, clamp(g.userData.alpha));
+    hook('pose', t, whole, stk);
   }
 
   // a style switch crossfades: the last frame, copied onto a canvas laid over the figure, fades out over 300 ms
   function restyle(s) {
-    if (!REDUCED && !STAGED) { draw(); const r = canvas.getBoundingClientRect(), cv = document.createElement('canvas');
+    if (!REDUCED && !STAGED && canvas.width && canvas.height) { draw(); const r = canvas.getBoundingClientRect(), cv = document.createElement('canvas');   // a 0 x 0 canvas (hidden, still sizing) has nothing to fade
       cv.width = canvas.width; cv.height = canvas.height; cv.getContext('2d').drawImage(canvas, 0, 0);
       Object.assign(cv.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', pointerEvents: 'none',
         transition: 'opacity 300ms cubic-bezier(.65,0,.35,1)', maskImage: canvas.style.maskImage, webkitMaskImage: canvas.style.webkitMaskImage,
@@ -914,7 +960,7 @@ function mount(fig, host) {
   function withExport(opts, fn) {
     const o = { t: 0, width: 1200, height: 960, scale: 1, background: 'plate', lineWidth: 1, glow: true, ...opts };
     if (!(o.width > 0 && o.height > 0 && o.scale > 0 && o.lineWidth > 0)) throw new Error('export: width, height, scale and lineWidth must be positive');
-    if (o.style && isPro(o.style)) { if (!PRO.failed) loadPro(); throw new Error(`export: the ${o.style} style is in linejig-pro.js, which has not loaded (yet)`); }
+    if (o.style && isPro(o.style)) { if (!FILES[o.style].failed) loadStyle(o.style); throw new Error(`export: the ${o.style} style is in an add-on file, which has not loaded (yet)`); }
     if (o.style && !STYLES[o.style]) throw new Error('export: unknown style ' + o.style);
     if (o.theme && o.theme !== 'light' && o.theme !== 'dark') throw new Error('export: theme is light or dark');
     holdOn();
@@ -938,6 +984,7 @@ function mount(fig, host) {
       GRID.mat.opacity = 1; VX = [];
       build(st, K.stacking);
       const vx = VX; VX = null;
+      widths(PW / VW / o.lineWidth);                         // a scaled style width: its share of the export's plate
       for (const m of lineMats()) { m.resolution.set(W / o.lineWidth, H / o.lineWidth);   // the hairline: lineWidth export px
         if (m.userData.dash) { m.dashSize = 1.6 * o.lineWidth * VW / PW; m.gapSize = 3.2 * o.lineWidth * VW / PW; } }
       pose(st, K.t, K.stacking);
@@ -1120,19 +1167,22 @@ function mount(fig, host) {
     else if (type === 'click') press(e.data.id ?? value);
     else if (type === 'state') { fig.onState?.(value, K); SIM.dirty = true; }   // a figure's own named state (a form's 'sent'), see the header
     else if (type === 'mode') setMode(value);
-    else if (type === 'style' && (STYLES[value] || PRO.names.includes(value))) useStyle(value);
+    else if (type === 'style' && (STYLES[value] || FILES[value])) useStyle(value);
     else if (type === 'grid') { GRID.on = !!value; built = ''; }
+    else if (ADDONS[type]) option(type, value);
     else if (type === 'dots') setDots(value);
     if (SCRUB.active && !EXP.hold) showSeek();                 // scrubbing: the loop is held, so show the change now
   });
+  // an add-on's option: its file is loaded first, then told (it rebuilds through X.rebuild)
+  function option(k, v) { loadAddon(k).then(() => { hook('option', k, v); wake(); }); }
   // the dots settings live in linejig-pro.js; sent before it arrived, they wait there in order
   function setDots(v) { if (HX.length) hook('setDots', v); else DQ.push(v); }
-  // a style by name: a Pro one not loaded yet is asked for (line art meanwhile) and shown once linejig-pro.js arrives
+  // a style by name: an add-on one not loaded yet is asked for (line art meanwhile) and shown once its file arrives
   function useStyle(s) {
     if (!isPro(s)) { WANT = null; restyle(s); return; }
-    if (PRO.failed) return;
+    if (FILES[s].failed) return;
     WANT = s;
-    loadPro().then(() => {
+    loadStyle(s).then(() => {
       if (WANT !== s) return; WANT = null;
       if (STYLES[s]) { if (DRAWN && !STAGED) restyle(s); else { setStyle(s); fade(); paint(); built = ''; } }
       if (SCRUB.active && !EXP.hold) showSeek(); else if (FREEZE !== Infinity && !STAGED) frame(); else wake();
@@ -1142,7 +1192,8 @@ function mount(fig, host) {
   const X = { fig, Q, root, STAGED, host, K, canvas, scene, cam, on, css, tone, tc, tint, parseSpec, extra: EXTRA, hull, P, at3,
     get style() { return STYLE; }, get renderer() { return renderer; }, get W() { return W; }, get H() { return H; },
     get span() { return FITW * PW / VW * (EXP.on ? 1 : V.z.x); },   // the object's width on screen, CSS px
-    get exporting() { return EXP.on; }, get reduced() { return REDUCED; }, brand: BR, paint: () => paint(), wake: () => wake() };
+    get exporting() { return EXP.on; }, get reduced() { return REDUCED; }, glow: GLOWK, brand: BR, paint: () => paint(), wake: () => wake(),
+    rebuild: () => { built = ''; wake(); }, get prims() { return prims; }, world: (pt) => P3?.get(pt), get ASSEMBLY() { return ASSEMBLY; } };
   const ATT = new Set();
   function attach(late) {                                      // every registered extension, once; late: the figure is already up
     const add = EXTS.filter((e) => !ATT.has(e)); if (!add.length) return;
@@ -1168,22 +1219,22 @@ function mount(fig, host) {
       XR?.dispose(); XR = null;
     }
     const api = { K, el: host.el, tick, draw, wake, prebuild, dispose, get running() { return LOOP.running; }, replay, reset, setMode, setTheme, setIntro, setStyle: (s) => { useStyle(s); },
-      setBrand: (v) => { if (setBrand(v)) { paint(); built = ''; } }, setGrid: (v) => { GRID.on = !!v; built = ''; }, setDots, click: (id) => heroClick(id), pause: () => pause(false), resume, layout: () => { layout(); frameCam(); built = ''; },
+      setBrand: (v) => { if (setBrand(v)) { paint(); built = ''; } }, setGrid: (v) => { GRID.on = !!v; built = ''; }, option, setDots, click: (id) => heroClick(id), pause: () => pause(false), resume, layout: () => { layout(); frameCam(); built = ''; },
       get hits() { return hits; }, toClient, ...EXPORT };
     for (const [k, d] of Object.entries(Object.getOwnPropertyDescriptors(api))) if (typeof d.value === 'function' && !['tick', 'draw', 'wake', 'prebuild', 'dispose', 'toClient', ...Object.keys(EXPORT)].includes(k)) { const f = d.value; api[k] = (...a) => { const r = f(...a); wake(); return r; }; }
     host.stage.add(api); wake(); return api;
   }
-  // ready and window.__linejig: a figure that opens in a Pro style announces itself once linejig-pro.js is in (or failed)
+  // ready and window.__linejig: a figure that opens in an add-on style announces itself once its file is in (or failed)
   const announce = () => {
     if (parent !== window) parent.postMessage({ type: 'ready', id: fig.id, intros: INTROS, styles: STYLE_NAMES, style: root.dataset.style, brand: BR.color, dots: hook('dots') ?? null, action: HERO.action || null, export: ['png', 'bitmap', 'svg', 'vector', 'duration', 'script', 'seek'], scrub: true, click: true }, '*');
     window.__linejig = { K, V, get live() { return live; }, get hover() { return over; }, get style() { return root.dataset.style; }, get hits() { return hits; },
       click: (id) => heroClick(id), toClient, replay, setMode, setStyle: useStyle,
       setBrand: (v) => { if (setBrand(v)) { paint(); built = ''; } }, get brand() { return { ...BR }; }, setDots, get dots() { const d = hook('dots'); return d ? { ...d } : null; },
-      setGrid: (v) => { GRID.on = !!v; built = ''; }, ...EXPORT };
+      setGrid: (v) => { GRID.on = !!v; built = ''; }, option, ...EXPORT };
     for (const [k, d] of Object.entries(Object.getOwnPropertyDescriptors(window.__linejig))) if (typeof d.value === 'function' && !(k in EXPORT) && k !== 'toClient') window.__linejig[k] = woken(d.value);
   };
   const woken = (f) => (...a) => { const r = f(...a); wake(); return r; };   // anything a host or a figure calls wakes the loop
-  if (WANT) loadPro().then(announce); else announce();
+  if (WANT) loadStyle(WANT).then(announce); else announce();
   // headless capture: drive frames with timers while frozen, then go idle so the compositor presents the frame
   if (FREEZE !== Infinity) { const kick = () => { frame(); if (performance.now() - start < FREEZE + 400) setTimeout(kick, 50); else requestAnimationFrame(frame); }; kick(); }
   else if (document.hidden) pause(true); else wake();

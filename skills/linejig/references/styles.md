@@ -4,10 +4,10 @@ Every figure from this skill is drawn in **line art**: white and black only, the
 colour, no glow and no text. It is the kernel's default (`style: 'lineart'`; the old name `line` still works), so a
 figure needs no setting for it.
 
-The Brand style (the hero as a solid part in a brand colour, with a soft halo and short engraved labels) and the Dots
-style (the drawing as a halftone dot matrix) come with Linejig Pro, a separate skill, `linejig-pro`
-(https://linejig.com/pricing). If it is installed, read it for those styles; if not, draw in line art and do not
-set `style`, `brand` or `dots` on a figure.
+The other styles restyle the same drawing, each in its own reference: Brand (`brand.md`, the hero as a solid part in a
+brand colour, with a soft halo and short engraved labels), Dots (`dots.md`, the drawing as a halftone dot matrix),
+Readout (`readout.md`, walls printed with binary digits, dark-first) and Pencil (`pencil.md`, drawn by hand in
+graphite). `SKILL.md`, "Style", says how to switch and how to take the brand colour. Shadow (below) works in every style.
 
 ## Which part is the hero
 
@@ -24,6 +24,23 @@ and then it is simply that part. The hero takes `hi`, the brightest tone; everyt
 about 2.2 times its footprint, cells about an eighth of it on a 1-2-5 step. Thin `lo` lines fade to nothing by
 distance and before the plate's edges, and the grid turns with the object. It fades in over 400 ms before the intro.
 Off by default.
+
+
+## Shadow
+
+`shadow: true` (or `?shadow=1`, `{type: 'shadow', value: true}`) adds a soft cast shadow and contact shadows. It's off
+by default, and the add-on (`addons/shadow.js`, beside the engine) loads only when a figure turns it on. One light, fixed
+to the world, sits in front of the object, above and a little to the left, so every shadow falls behind it and turns
+with the floor when you orbit. Overlaps never darken twice, and shadows fade before the plate's edge. In line art the
+shadow is a neutral grey from the tone ramp. Use it where the object sits on something and depth helps; leave it off
+for floating or flat objects.
+
+- Every filled part casts. `{cast: false}` on `K.add`, `K.layer` or an `ASSEMBLY` row leaves a part out (wires, glows);
+  `cast: true` lets a line-only part, such as a rod, cast.
+- The ground (z 0, or `ground: z`) receives. `K.receiver?.(F, ring, w)` declares another surface that takes shadows (a
+  sheet of paper, a desk top). Keep the `?.` so the figure still works without the add-on. Thin flat solids on the
+  ground receive by themselves, and a part never shadows a surface in its own `ASSEMBLY` row.
+- `light: [x, y, z]` sets a figure's own light direction. `fitShadow: true` fits the plate round the shadow too.
 
 
 ## Rules

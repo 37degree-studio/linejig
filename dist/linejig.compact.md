@@ -12,6 +12,8 @@ A figure page needs the three.js import map, `<script type="importmap">{ "import
 and a module script that imports `createFigure` from `https://linejig.com/kernel/linejig.js`.
 
 ## What stays out
+These hold in line art; the styles change only what `## Style` says.
+
 - **No text in the illustration.** No leaders, pointer dots, numbers on parts, captions, headings, labels or "Fig."
   marks. If the host page needs words, they are the page's job, not the drawing's.
 - **No small detail.** No rivets, bands, hatching, engraving, textures, shading, gradients or glow.
@@ -33,8 +35,9 @@ the embed contract, the **action event** (`HERO.action`, posted when the hero's 
 empty state or onboarding step can hand off to its host page) and `?mode=turntable` (no hand, a slow swing for
 loading screens and recorded loops). Import `https://linejig.com/kernel/linejig.js` and link
 `https://linejig.com/kernel/linejig.css`, with the three.js import map, as `scripts/starter.html` does.
-The Brand and Dots styles are Linejig Pro and live in `linejig-pro.js` beside it: the kernel loads that file by itself,
-once, only when a figure asks for brand or dots, so a line-art page never downloads it.
+Every other style is an MIT add-on file beside it (Brand and Dots in `linejig-pro.js`, Readout in `styles/readout.js`,
+Pencil in `styles/pencil.js`): the kernel loads a style's file by itself, once, only when a figure asks for that style,
+so a line-art page never downloads it.
 To see finished figures, open them from the gallery and read their source.
 
 ## The look, in brief

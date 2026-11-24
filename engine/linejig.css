@@ -2,9 +2,10 @@
    against the plate. Linked in each figure's head so the plate colour is there before the first paint; the kernel
    links it itself if a page forgets. */
 /* the plate sits a touch off the page in both themes (#f7f7f8 on white, #111111 on near-black) so a figure lifts off it */
-:root { --plate: #f7f7f8; --hi: #17171a; --edge: #6a6a72; --mid: #8f8f97; --lo: #b6b6bc; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; } }
-:root[data-theme="dark"] { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; }
+/* ink: the one fixed tone, near-black in both themes (fillTone 'ink'); on the dark plate its edge is a step lighter */
+:root { --plate: #f7f7f8; --hi: #17171a; --edge: #6a6a72; --mid: #8f8f97; --lo: #b6b6bc; --ink: #161616; --ink-edge: #161616; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; --ink-edge: #6b6c72; } }
+:root[data-theme="dark"] { --plate: #111111; --hi: #e6eaf0; --edge: #a8aab1; --mid: #797b82; --lo: #4f5056; --ink-edge: #6b6c72; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: var(--plate); }
 main { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }   /* the canvas fills the window */

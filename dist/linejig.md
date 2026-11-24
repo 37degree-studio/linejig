@@ -8,7 +8,7 @@
 > Where the text names a file such as `references/motion.md`, that file is included below under the same name. If
 > you cannot run a browser or a shell, skip the headless render checks and ask the user to open the page and look.
 
-**When to use it:** Draws interactive 3D line illustrations in three.js. One object is built from a few rounded solids and drawn as 3D line illustrations in an isometric view (2:1 axonometric) with one fine line width, white and black and hierarchy by tone, so all figures keep a consistent illustration style. It builds in (stack or draw-on), then its one hero part (a needle, a lid, the keys of a keyboard) answers hover and click, and the user can drag to turn and zoom it. Illustration only, with no captions, leader labels, logos or generated images. Use it whenever someone asks for an interactive 3D illustration, a line-art, line-drawn, technical-drawing or isometric object illustration, an animated three.js line drawing, a draw-on or assembly animation, an illustration for an empty state, 404 page, onboarding step, slide or hero, or to add, change or embed a figure from the Linejig gallery, even if they only say "add a drawing here".
+**When to use it:** Draws interactive 3D line illustrations in three.js. One object is built from a few rounded solids and drawn in an isometric view (2:1 axonometric) with one fine line width, in line art (white and black, hierarchy by tone) or in the Brand, Dots, Readout and Pencil styles, so all figures keep a consistent illustration style. It builds in (stack or draw-on), then its one hero part (a needle, a lid, the keys of a keyboard) answers hover and click, and the user can drag to turn and zoom it. No captions, leader labels, logos or generated images. Use it whenever someone asks for an interactive 3D illustration, a line-art, isometric, halftone, pencil-sketch or brand-colour object illustration, an animated three.js line drawing, a draw-on or assembly animation, an illustration for an empty state, 404 page, onboarding step, slide or hero, or to add, change, restyle or embed a figure from the Linejig gallery, even if they only say "add a drawing here".
 
 ## Linejig
 
@@ -41,6 +41,8 @@ The user judges the idea before the execution.
 
 ### What stays out
 
+These hold in line art; the styles change only what `## Style` says.
+
 - **No text in the illustration.** No leaders, pointer dots, numbers on parts, captions, headings, labels or "Fig."
   marks. If the host page needs words, they are the page's job, not the drawing's.
 - **No small detail.** No rivets, bands, hatching, engraving, textures, shading, gradients or glow.
@@ -63,17 +65,54 @@ the embed contract, the **action event** (`HERO.action`, posted when the hero's 
 empty state or onboarding step can hand off to its host page) and `?mode=turntable` (no hand, a slow swing for
 loading screens and recorded loops). Import `https://linejig.com/kernel/linejig.js` and link
 `https://linejig.com/kernel/linejig.css`, with the three.js import map, as `scripts/starter.html` does.
-The Brand and Dots styles are Linejig Pro and live in `linejig-pro.js` beside it: the kernel loads that file by itself,
-once, only when a figure asks for brand or dots, so a line-art page never downloads it.
+Every other style is an MIT add-on file beside it (Brand and Dots in `linejig-pro.js`, Readout in `styles/readout.js`,
+Pencil in `styles/pencil.js`): the kernel loads a style's file by itself, once, only when a figure asks for that style,
+so a line-art page never downloads it.
 To see finished figures, open them from the gallery and read their source.
 
 ### Style
 
-This skill draws in **line art** (`references/styles.md`), the kernel's default: white and black only, the grey ramp,
-`hi` for the hero, text-free. The Brand and Dots styles (the hero in a brand colour; the drawing as a dot matrix)
-come with Linejig Pro, the `linejig-pro` skill (https://linejig.com/pricing). If it is installed, follow it for
-those styles; if not, draw in line art. Either way the model, the assembly and the hero are the same, so a figure
-made here works in every style.
+A figure draws in **line art** (`references/styles.md`), the kernel's default: white and black only, the grey ramp,
+`hi` for the hero, text-free. Four more styles restyle the same drawing with one setting; the model, the assembly and
+the hero stay the same, so a figure made in one style works in every style.
+
+1. **Brand** (`references/brand.md`): quiet grey lines, and the hero as a solid part in the user's brand colour
+   (orange `#f5821f` by default) with a soft glow behind it. Short labels may sit engraved on part tops; optionally
+   the object sits in context on a rail with a dashed footprint.
+2. **Dots** (`references/dots.md`): the same drawing as a screen-space dot matrix, tone as dot size, the hero's dots
+   in the brand colour, with a cursor swell.
+3. **Readout** (`references/readout.md`): quiet lines on a dark grained plate, the walls printed with a band of binary
+   digits on one side and the same data as cells on the other, the hero in the brand colour with a soft bloom. Dark-first.
+4. **Pencil** (`references/pencil.md`): the drawing by hand in graphite on the plate as paper, pencil strokes with
+   pressure and overshoot, tone as hatching in each face's plane, the hero in a brand-coloured pencil; silver on dark.
+
+Switch with `style: 'lineart' | 'brand' | 'dots' | 'readout' | 'pencil'` in `createFigure`, `?style=` on a figure page,
+or `{type: 'style', value}` after `ready` (the old names `line` and `accent` still work). Until a style's file arrives
+the figure draws line art, and a figure that opens in another style sends `ready` only once it is in. A page may also
+import the file itself to have the style at once.
+
+#### The brand colour
+
+- Brand, Dots, Readout and Pencil take one colour: `brand: { color: '#hex' }`, `?brand=<hex>` (no `#`), or
+  `{type: 'brand', value: '#hex'}` live. The kernel derives every other tone from it; pass it as it is.
+- **Ask for it, never guess.** On a component library (shadcn/ui or any token theme) the primary token (`--primary`)
+  is the likely source, but only once the user confirms it is their brand colour. Convert the computed colour to
+  hex for both themes.
+- The colour goes on the part the message is about (`references/brand.md`, "Which part takes the colour").
+
+#### What changes from line art
+
+- **Colour:** white, black, the grey ramp and the one brand colour on the hero. No other colours.
+- **Glow:** only the soft halo behind the hero, in Brand and Readout. None in Dots or Pencil.
+- **Text:** only in Brand, and only short words engraved flat on a part's top face to name that part. Never in
+  Dots, never a caption, a leader or a call to action. Readout's digits are a wall texture, not words.
+- **Hatching:** only in Pencil, as its tone.
+
+#### Check the styles
+
+On top of `references/verify.md`: capture every style (`?style=lineart`, `?style=brand`, `?style=dots`,
+`?style=readout` and `?style=pencil`), and in Brand at least one colour besides orange (`?brand=2f6bff`), on both
+plates. On white the hero must read clean and bright, not muddy; on black, not brown. Measure the rendered pixels.
 
 ### The look, in brief
 
@@ -178,7 +217,10 @@ everywhere else, import the published kernel from https://linejig.com/kernel/.
 - `references/metaphors.md`: choosing an object for a message, with an example set.
 - `references/drawing.md`: camera, rounded prisms, painter fill, the one width, the five tones, palettes.
 - `references/motion.md`: moves, timings, springs, draw-on, reduced motion, hand-overs.
-- `references/styles.md`: line art, which part is the hero, the floor grid, and where the Pro styles live.
+- `references/styles.md`: line art, which part is the hero, the floor grid and the shadow.
+- `references/brand.md`: the brand colour and its derived tones, the Brand style, which part takes the colour,
+  recolouring live, and the lesson on muddy colour.
+- `references/dots.md`, `references/readout.md`, `references/pencil.md`: each style and every setting.
 - `references/interaction.md`: the hero part, hover and click responses, orbit, zoom, hit testing, cursors.
 - `references/verify.md`: headless Chrome capture, frozen frames, console errors.
 - `references/integration.md`: on top of a component library (tokens, cards, dark mode), and from the user's own
@@ -187,6 +229,142 @@ everywhere else, import the published kernel from https://linejig.com/kernel/.
 - https://linejig.com/illustrations.json: the gallery manifest; each entry's `path` is a figure page to read.
 - `scripts/starter.html`: a minimal figure on the kernel with a placeholder object. Open it, or capture with
   `?freeze=MS`.
+
+## File: references/brand.md
+
+### Brand style
+
+The Brand style draws the figure in quiet grey lines with its hero as a solid part in the user's brand colour.
+Set it with `style: 'brand'`, `?style=brand` or `{type: 'style', value: 'brand'}`; the old name `accent` still works.
+Everything else (the model, the assembly, the hero, the motion) is the line-art figure from the `linejig` skill,
+unchanged.
+
+#### Brand colour
+
+The brand style takes one colour, the user's brand colour (`brand: { color: '#hex' }`, `?brand=hex`, or a
+`{type:'brand', value}` message from the host). Orange `#f5821f` is only the default. Every tone is derived from it:
+top face = the colour itself, unchanged, on both plates. The other tones are HSL steps measured from the approved
+orange (`#f5821f`): on a dark plate the side is hue −6, lightness −7 (`#e0560f`), the edge hue +3, lightness +17
+(`#ffb36b`), with an additive glow behind the part and never over it. On a light plate a colour reads paler, so the top gets a
+little more saturation (+8), the side is darker (lightness −7), strokes on the colour are clearly darker (lightness
+−17), and a soft glow (normal blending, about 0.3) sits behind the part. Never light edges on white: they wash it out. The outline tint is the colour at 15% over a dark plate, 8% over white. An optional
+second colour (`color2`) sets the outline level. If the colour is too close to the plate, only the edge is pushed;
+the user's colour is never altered. No gradient on the hero: a lighter end washed it out.
+
+When a figure is made for a brand, ask for the brand colour (or read it from the brand's tokens) and pass it in;
+never guess a brand's colour.
+
+#### Brand
+
+From a reference the user supplied (an isometric model selector: a housing with a slot of stacked cards, the front
+card glowing orange, input and output tiles on a rail).
+
+- **The base is the line style:** the same camera, rounded solids filled with the ground, fine-line edges and creases,
+  on the dark plate. Grey lines are quieter than in the line style: edges in `edge`, most detail in `lo`.
+- **The hero is the only colour.** It is a solid object in the accent, not an outline:
+  - top face lighter, side faces darker: a flat two-tone shade from the face normal, with no lighting model and no
+    gradient across a face;
+  - edges in a lighter tint of the accent;
+  - a soft glow behind it, an additive blurred halo of about 40 to 60 px at 1440 wide, at low opacity. It is the only
+    glow in the drawing. A figure can turn it off or down (`glow: false` or `glow: 0..1`, `?glow=0..1`), for a large
+    hero the halo would muddy.
+  - In a family hero (keys, cards in a slot, chairs), the member that is active (hovered, pressed, selected) takes the
+    accent, and the rest stay grey. The resting accent member, if any, is the one the message is about.
+- **Ink parts stay ink.** A part with `fillTone: 'ink'` is near-black with ink edges in both themes (a lighter edge on
+  the dark plate), never the brand colour and never the hero, wherever it sits.
+- **Two levels of accent.** *Solid* for the active hero, as above. *Outline* for a secondary state (the item
+  that is next, in flight or just passed, like the upstream tile in the reference): accent edges plus a very dark
+  accent tint on its faces (about 12 to 18% accent over the plate), and no glow. At most one outline part at a time.
+- **The plate is near-black, not pure black:** about `#111111`, with grey edges `#7c7c7c` (4.5:1), `mid` `#606060`
+  (3:1) and detail (`lo`) `#4a4a4a`: a step under the lineart greys, so the object reads clearly while the orange leads.
+- **Default brand colour:** orange. Top `#f5821f`, side `#e0560f`, edge `#ffb36b`, glow `#ff6a00` at 0.35 to 0.5. On a
+  light plate: top `#f5821f` with a little more saturation, side and edges darker, and a soft glow
+  (normal blending, about 0.3) behind it.
+- **Labels are allowed in this style,** and only here: short words or a small icon engraved flat on a part's top
+  face (a model name on a card, a file name on a tile). Sans, all on the face plane, so they foreshorten with it.
+  Grey (`mid`) on grey parts, white on the hero. A label names what the part is; it never explains or instructs, so
+  calls to action still belong to the host page (the action event).
+- **Context, optional:** the object may sit in its system. That means a rail or lines running in and out, with
+  neighbour tiles at reduced tone that fade to the plate at the edges, so the eye stays on the centre. A **dashed
+  footprint** on the ground around the main object marks it as the selected or active one.
+- **Context in detail** (the reference's pipeline):
+  - The **rail** is a track of two parallel lines on the ground, running diagonally through the plate along one world
+    axis, past the main object.
+  - **Tiles** on the rail are rounded square blocks with two inset rings on the top (a bevel, then a recessed
+    panel). A small line icon sits centred in the panel, with an optional label under it, both on the face plane.
+    Inputs sit upstream of the main object and outputs downstream, in reading order.
+  - The **main object** stands on a wider, thin **base plate** whose side edges carry short vertical seam ticks. The
+    **dashed footprint** sits on the ground just outside the base plate.
+  - Optional motion: tiles drift slowly along the rail into the main object and out the other side. The one about to
+    enter takes the outline accent.
+- **Small honest hardware** reads well here: corner screws with a cross head, a slot, a bezel. Keep them in `lo`.
+- **Frame, optional:** thin grid lines at the plate's edges, very faint, like a canvas panel.
+
+#### Which part takes the colour
+
+The colour goes on **the part the message is about**. Usually that is the control you act on, not the thing that
+responds, when the two are different parts. But when the message is about the contents, the contents take the colour:
+the empty inbox's letter glows, not the envelope's flap, even though you open the flap. On the
+camera the shutter button is orange and the lens stays in line; pressing the button makes the lens and shutter answer.
+Glass, openings and the centre of a coloured part (a lens's glass, a magnifier's glass, a window) stay the plate
+colour, so they read as clear. Most objects have one part that is both (a needle, a drawer, a key), and then it is
+simply that part. Check every figure for this: rare, but it happens.
+
+#### Recolouring live
+
+The host can recolour a figure in Brand or Dots live: `{type: 'brand', value: '#hex'}` (or `{color, color2}`). The
+kernel rederives every brand tone and redraws; a figure in line art keeps the colour for later and shows none.
+
+#### Lesson
+
+A derived palette that moves the base colour (lifting the top, darkening the side by 14% in OKLCH, a gradient,
+light edges and glow on white) made the orange brown on dark and washed out on white. The user's own colour goes on
+the top face unchanged; only small measured steps move the other tones. Measure the rendered pixels before showing.
+
+## File: references/dots.md
+
+### Dots style
+
+The same model as a dot matrix (`style: 'dots'`, `?style=dots`), taking the brand colour the same way as the Brand
+style (`brand.md`). The kernel renders the figure offscreen in ink codes
+(red: ink, green: the hero's share, blue: the outline's share), reduces each screen cell to one value, and draws one
+mark per cell. The grid is in screen space, so cells keep their size when zoomed.
+
+- **Tone is dot size.** Edge lines become rows of the largest dots in the grey ramp (`hi` to `mid`); solids get an even
+  halftone, sparse on the top face and denser on the sides, in `lo`, so they still read as 3D. Empty cells stay plate.
+- **The hero's dots are the brand colour,** and only the hero's. The accent fade still crossfades between members.
+- **Ink parts are ink dots.** A part with `fillTone: 'ink'` is drawn in near-black dots (`--ink`) in both themes,
+  grown until they close the grid so it reads solid; on the dark plate its edge dots are a lighter grey. It is never
+  the brand colour.
+- **No glow.** The cursor swells dots within about 40 px by 1.25 times, eased.
+- A cell takes the strongest ink within about a cell of its centre, with a soft falloff, so a line moving across the
+  grid grows one dot as it shrinks the next instead of popping.
+
+Settings (`createFigure({ dots })`, `?dots=shape:square,cell:8`, or `{type: 'dots', value}`; all live, no rebuild):
+
+| Option | Range | Default | What it does |
+| --- | --- | --- | --- |
+| `shape` | circle, square, diamond, line, cross, or a registered name | circle | the mark; line is a short dash along the cell's diagonal; `registerDotShape(name, glsl)` (exported by `linejig-pro.js`; import it from there before the figure mounts) adds one, GLSL that sets the signed distance `d` from `l`, `r`, `ink`, `dsize`, `sw` |
+| `cell` | 2 to 16 px | 3.5 | the cell size in CSS px |
+| `size` | 0.3 to 1 | 0.78 | the largest mark, as a fraction of the cell |
+| `gap` | 0 to 8 px | 0 | extra space between cells, apart from the mark size |
+| `contrast` | 0.5 to 2 | 1 | how strongly tone maps to size |
+| `threshold` | 0 to 0.5 | 0.05 | below this ink, no mark |
+| `angle` | 0 to 45 degrees | 0 | turns the grid |
+| `swell`, `radius` | 0 to 2, 0 to 120 px | 1, 40 | the cursor swell (1 is 1.25 times) and its reach |
+| `faces` | bool | true | faces as halftone; false leaves only the edges as dots |
+| `jitter` | 0 to 0.5 | 0 | a small random offset per mark, for a printed feel |
+| `heroOnly` | bool | false | only the hero in dots; the rest stays lineart |
+| `tint` | bool | false | every mark in the brand colour: edges in the colour itself (held to 3:1 on the plate), detail and faces the same hue a step lighter on white, a step dimmer on black, never a brown or grey mix |
+| `auto` | bool | true | adapt the cell to the object's size on screen (below) |
+| `across` | 40 to 300 | 180 | with `auto`, about how many cells span the object |
+
+**Size-adaptive.** With `auto`, the cell is about the object's on-screen width over `across` (180; never under 2 CSS px or 1.5
+device px, never over `cell`), eased over 150 ms as it zooms or resizes, so a small plate gets finer cells and full
+screen keeps the set look. Below a 500 px object the face halftone thins and the hero's dots get a minimum size, so
+edges and the hero's silhouette carry it; glass and openings stay empty.
+
+With the floor grid on (`grid: true`, from the `linejig` skill), the grid becomes faint dots.
 
 ## File: references/drawing.md
 
@@ -260,8 +438,19 @@ crease on every cap and four lines on the case rim; it read as noise.)
 | `hi` | the one bright highlight: the part that carries the message (a needle, a key, a door) |
 | dashed | a guide or axis, in `lo` |
 | dot | a small filled dot, in `hi` or `mid` |
+| `ink` | a solid near-black part (`fillTone: 'ink'`): eyes, a pupil, a key's black cap |
 
-One `hi` part per drawing. Contrast must step clearly: `hi` > `edge` > `mid` > `lo` against the plate.
+One `hi` part per drawing.
+
+**Ink.** `fillTone: 'ink'` (on `K.add(..., { fillTone: 'ink' })`, or as the last argument of
+`K.solid(F, rings, w0, w1, silTone, creaseTone, { fillTone: 'ink' })`) fills a part near-black (`--ink`, `#161616`) in
+**both** themes, where `hi` flips light on the dark plate. On the dark plate its lines take `--ink-edge`, a thin step
+lighter (`#6b6c72`), so it reads against `#111111`; on white they are ink too. Every style honours it on any part: it is
+never the hero and never takes the brand colour. Use it for what is black in the real object, sparingly.
+
+**Glow.** A figure may turn its style's hero glow off or down: `glow: false` or `glow: 0..1` in the figure definition,
+or `?glow=0..1`. The default (1) is the style's own glow; line art has none. Turn it off where a large hero would be
+muddied by it. Contrast must step clearly: `hi` > `edge` > `mid` > `lo` against the plate.
 
 #### 6. Palette: white and black, the same for every illustration
 
@@ -304,7 +493,7 @@ the address and through messages.
 |---|---|---|
 | Plate (the ground every face is filled with) | the surface the figure sits on: `--card` inside a Card, `--background` on the page, `--muted` in a muted well | `?plate=<light>,<dark>`: two six-digit hex values without `#`, light then dark (defaults `f7f7f8,111111`) |
 | Ink (`hi`, `edge`, `mid`, `lo`) | nothing: keep the kernel's grey ramp | not an address setting |
-| Style | line art, the default; the Brand and Dots styles, with the brand colour from `--primary`, are in the `linejig-pro` skill | nothing to pass |
+| Style | line art, the default, or Brand, Dots, Readout or Pencil with the brand colour from `--primary` once the user confirms it (`SKILL.md`, "Style") | `?style=<id>` and `?brand=<hex>` |
 
 - Tokens are often OKLCH or HSL (`--primary: oklch(0.205 0 0)`). The kernel takes hex, so convert the computed colour
   (in the browser, `getComputedStyle(el).backgroundColor` on an element that uses the token gives `rgb(...)`; turn
@@ -341,7 +530,7 @@ import { useEffect, useRef } from 'react';
 const ORIGIN = 'https://linejig.com';
 const hex = (rgb) => rgb.match(/\d+/g).slice(0, 3).map((n) => (+n).toString(16).padStart(2, '0')).join('');
 
-export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', onAction }) {
+export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', style = 'lineart', brand, onAction }) {
   const ref = useRef(null);
   const dark = () => document.documentElement.classList.contains('dark');
   useEffect(() => {
@@ -358,7 +547,8 @@ export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', onAction }) 
     addEventListener('message', onMessage);
     return () => { removeEventListener('message', onMessage); watch.disconnect(); };
   }, [onAction]);
-  const q = new URLSearchParams({ embed: '1', plate, theme: dark() ? 'dark' : 'light' });
+  const q = new URLSearchParams({ embed: '1', style, plate, theme: dark() ? 'dark' : 'light' });
+  if (brand) q.set('brand', brand.replace('#', ''));
   return <iframe ref={ref} src={`${ORIGIN}/${id}/index.html?${q}`} title={title} loading="lazy"
     style={{ width: '100%', aspectRatio: '5 / 4', border: 0 }} />;
 }
@@ -669,6 +859,123 @@ With `prefers-reduced-motion: reduce` or `?reduced=1`: no moves, no draw-on; the
 `?freeze=MS` stops the clock MS after the start. Under headless Chrome drive frames with `setTimeout` (about every
 50 ms) while frozen; virtual time runs timers more reliably than animation frames.
 
+## File: references/pencil.md
+
+### Pencil style
+
+The same model drawn by hand in graphite (`style: 'pencil'`, `?style=pencil`), with the hero in a brand-coloured pencil. The kernel loads `styles/pencil.js` the first time a figure asks for it. The style draws every line itself, as a pencil stroke, through the engine's `primLines` hook, and builds tone from hatching through `primMesh`. Fills stay plate, so near parts still hide far ones.
+
+- **One pencil.** Outlines are 1.3 CSS px and hatching 0.8 px at every size. Pressure varies within a stroke, never between strokes.
+- **A hand, not a plotter.**
+  - A stroke lands, swells and lifts.
+  - It runs past a sharp corner (overshoot), growing with the corner's sharpness, so nothing pops as the view turns.
+  - Silhouettes get a faint second pass.
+  - Light construction lines run past long straight edges.
+  - Keep retrace and overshoot faint: heavy ones read as doubled lines and leaks.
+- **Tone is stroke density, never a grey fill.** Faces turned away from the light carry hatching, and darker ones add a cross layer and a soft smudge.
+  - The light sits up and to the left of the viewer.
+  - A light tone is a few whole lines, added between lines as the tone deepens, never scattered specks.
+  - Lit faces stay paper.
+- **Ink is heavy pressure.** A part with `fillTone: 'ink'` is the one solid fill: near-black (`--ink`) in both themes, under the paper's tooth, with its own pencil outline (half strength on the dark plate, so it reads as a lighter edge). It is never hatched and never the hero.
+- **Texture stays on the part.**
+  - On a solid, hatching is in the face's own u and v: diagonal on flat walls, along the axis on round ones.
+  - On a plain fill (a lathe body, a sphere), it is printed round a vertical axis through the part, so it turns with the part.
+  - Strokes are seeded by the part's identity, never by build order.
+- **The plate is the paper.** The graphite breaks on a paper tooth fixed to the page in CSS px, repeating every 256 px. A page that tiles `paperTile({ plate, amt, dark })` (exported by `styles/pencil.js`) as its background gets one continuous sheet behind every figure. The plate colour stays `--plate`.
+- **The hero is a coloured pencil:** outline, hatching and a light burnished layer, at the brand's own hue, with an eraser-clean highlight lifted out of its lit faces.
+  - It fades in and out with the engine's accent fade (220 ms in, 260 ms out).
+  - Its outline is a pressed step darker on white and a step lighter on black, so it never reads brown.
+- **Boil** (on by default) redraws each stroke in place 7 times a second, like hand-drawn animation.
+  - It eases out while the view turns and comes back once it rests.
+  - It never runs under reduced motion, `?freeze` or an export.
+
+**Dark paper.** On the dark plate the pencil is silver on black. A white pencil draws the light, not the shadow, so the hatching moves to the lit faces, and the edges press a little harder to stay as present as on white. The hero is a step lighter, so orange never turns brown on black.
+
+Settings (`createFigure({ pencil })`, `?pencil=hatch:0.5,boil:false`, or `{type: 'pencil', value}`; all live, no rebuild):
+
+| Option | Range | Default | What it does |
+| --- | --- | --- | --- |
+| `pressure` | 0 to 1 | 0.15 | how much a stroke swells and lifts along its length; 0 is an even line |
+| `wobble` | 0 to 3 px | 0 | the hand's drift along a stroke |
+| `overshoot` | 0 to 12 px | 4 | how far a stroke runs past a sharp corner; 0 makes corners meet |
+| `retrace` | 0 to 1 | 0.3 | the faint second pass on silhouettes |
+| `construct` | bool | true | light construction lines past long straight edges |
+| `constructLen` | 0 to 60 px | 22 | how far they run past the corner |
+| `hatch` | 0 to 2 | 0.7 | hatching density; 0 leaves outlines only |
+| `spacing` | 2 to 10 px | 3.1 | hatch line spacing at the plate's fitted size |
+| `angle` | 0 to 180 degrees | 134 | the hatching's angle in each face's plane, from the face's horizontal |
+| `cross` | 20 to 90 degrees | 58 | the cross layer's turn from the first |
+| `grain` | 0 to 1 | 0.65 | how much the graphite breaks on the paper's tooth |
+| `paper` | 0 to 1 | 0.5 | the tooth shown on the plate itself |
+| `smudge` | 0 to 1 | 0.65 | soft graphite in the deepest shadows |
+| `eraser` | 0 to 1 | 0.35 | the eraser-clean highlight on the hero's lit faces (white plate) |
+| `heroBase` | 0 to 1 | 0.3 | the hero's light burnished layer under its hatching |
+| `boil` | bool | true | redraw in place, hand-animated |
+| `boilAmp` | 0 to 2 px | 0.4 | how far a redrawn stroke lands from the last |
+| `fps` | 2 to 12 | 7 | boil frames per second |
+
+Exports: the PNG export draws Pencil, with boil held still. The vector and SVG export get the engine's own lines, without hatching.
+
+## File: references/readout.md
+
+### Readout style
+
+The same model as a printed instrument (`style: 'readout'`, `?style=readout`), taking the brand colour the same way as
+the Brand style (`brand.md`). It lives in its own add-on file, `kernel/styles/readout.js` (MIT, like the engine), which
+the kernel imports once, the first time a figure asks for Readout. The walls carry a material printed in wall space:
+binary digits on one side, the same data as cells on the other, so the object reads as code and machinery.
+
+- **One quiet line on every outline,** one width, on Linejig's plate (`--plate`) with a faint static grain. Tops stay
+  empty.
+- **The walls are printed, by the way they face.** Walls turned to the left carry rows of `0` and `1` in mono; walls
+  turned to the right carry the shadow side (`shade`). Both use one cell grid in wall space: u along the wall's top
+  edge, v down from it. They foreshorten with the wall and stay fixed to it as the view turns. The digits are one size
+  across the figure.
+- **A band, not a fill.** Up to three rows hang from each wall's top edge. The first is crisp, at about the edges'
+  strength, and the next fade; the rest of the wall is plate. Small walls get no texture, and walls too narrow for digits get cells.
+- **Grey only; the colour is the hero's.** The hero is flat brand colour (top, side a step dimmer, no edge lines) with a
+  soft bloom of its own shape behind it and a small engraved X on its largest top.
+- **A dashed footprint** under every figure that doesn't draw its own: the base in its own frame (a circle for a round
+  base, a rounded rect for a boxy one), grown by one margin, with parts that stick out left off.
+- The digits scroll slowly along the wall (8 CSS px a second); they stand still under reduced motion and `?freeze`.
+  Nothing reacts to the pointer, and the texture never rebuilds a frame.
+
+Settings (`createFigure({ readout })`, `?readout=band:2,shade:rules`, `?shade=bits|rules|dots`, or
+`{type: 'readout', value}`; all live, no rebuild):
+
+| Option | Range | Default | What it does |
+| --- | --- | --- | --- |
+| `shade` | bits, rules, dots | bits | the shadow side: the digits' data as filled cells, fine lines along the wall, or one dot per cell |
+| `row` | 0.006 to 0.03 | 0.016 | the row pitch as a share of the plate's width (one size for the figure) |
+| `rowMin`, `rowMax` | 4 to 12, 8 to 20 px | 7, 15 | the row pitch held in this range of CSS px |
+| `band` | 1 to 8 | 3 | rows of texture under each wall's top edge |
+| `bandFade` | 0.2 to 1 | 0.72 | each row's strength relative to the row above |
+| `minCells` | 0 to 200 | 14 | a wall side under this many cells gets no texture |
+| `narrow` | 0 to 8 | 3 | a digit wall under this many cells wide shows cells instead |
+| `density` | 0 to 1 | 0.8 | the share of cells kept on a big wall (a fixed per-cell dropout) |
+| `denseFrom`, `denseTo` | 0 to 2000, 10 to 5000 | 80, 600 | wall sizes in cells where the thinning starts and is full |
+| `digitA`, `shadeA` | 0 to 1 | 1, 1 | the digits' and the shadow side's strength |
+| `bitSize`, `dotSize` | 0.2 to 0.9, 0.1 to 0.8 | 0.72, 0.34 | a cell's square and a dot's diameter, as a share of the cell width |
+| `rulesPerRow` | 1 to 6 | 3 | rules: lines per row |
+| `scroll` | 0 to 40 px/s | 8 | how fast the digits move along the wall |
+| `grain` | 0 to 0.2 | 0.05 | the plate's grain (0.7 of it on white) |
+| `foot`, `footRadius` | 0 to 0.4, 0 to 0.5 | 0.09, 0.12 | the footprint's margin and corner radius, as shares of the base's size |
+| `dash`, `gap` | 2 to 20 px | 8, 6 | the footprint's dash and gap |
+
+**Ink and glow.** A part with `fillTone: 'ink'` is solid ink, near-black in both themes with a lighter edge on the dark
+plate, and carries no wall texture. The hero's bloom follows the figure's glow option (`glow: false` or `0..1`,
+`?glow=0..1`).
+
+**Dark-first.** Readout is drawn for the dark plate. On white it holds (darker digits and cells, edges a step lighter),
+but it is calmer and the glow is a light tint.
+
+**Export.** PNG and bitmap exports include the walls and grain. The vector exports (`svg`, `vector`) do not: they carry
+the lines, fills and glow only.
+
+**Engine.** Readout uses two generic hooks of the kernel: `solid()` puts `o.solid = { F, ring, w0, w1 }` on its
+silhouette, and `build()` asks a style extension for its own meshes per primitive (`primMesh(p, z, N, t0)`). A figure
+that builds its own prisms (with `o.top`) still gets walls: Readout finds the extrusion from the fill and the cap.
+
 ## File: references/styles.md
 
 ### Style: line art
@@ -677,10 +984,10 @@ Every figure from this skill is drawn in **line art**: white and black only, the
 colour, no glow and no text. It is the kernel's default (`style: 'lineart'`; the old name `line` still works), so a
 figure needs no setting for it.
 
-The Brand style (the hero as a solid part in a brand colour, with a soft halo and short engraved labels) and the Dots
-style (the drawing as a halftone dot matrix) come with Linejig Pro, a separate skill, `linejig-pro`
-(https://linejig.com/pricing). If it is installed, read it for those styles; if not, draw in line art and do not
-set `style`, `brand` or `dots` on a figure.
+The other styles restyle the same drawing, each in its own reference: Brand (`brand.md`, the hero as a solid part in a
+brand colour, with a soft halo and short engraved labels), Dots (`dots.md`, the drawing as a halftone dot matrix),
+Readout (`readout.md`, walls printed with binary digits, dark-first) and Pencil (`pencil.md`, drawn by hand in
+graphite). `SKILL.md`, "Style", says how to switch and how to take the brand colour. Shadow (below) works in every style.
 
 #### Which part is the hero
 
@@ -697,6 +1004,22 @@ and then it is simply that part. The hero takes `hi`, the brightest tone; everyt
 about 2.2 times its footprint, cells about an eighth of it on a 1-2-5 step. Thin `lo` lines fade to nothing by
 distance and before the plate's edges, and the grid turns with the object. It fades in over 400 ms before the intro.
 Off by default.
+
+#### Shadow
+
+`shadow: true` (or `?shadow=1`, `{type: 'shadow', value: true}`) adds a soft cast shadow and contact shadows. It's off
+by default, and the add-on (`addons/shadow.js`, beside the engine) loads only when a figure turns it on. One light, fixed
+to the world, sits in front of the object, above and a little to the left, so every shadow falls behind it and turns
+with the floor when you orbit. Overlaps never darken twice, and shadows fade before the plate's edge. In line art the
+shadow is a neutral grey from the tone ramp. Use it where the object sits on something and depth helps; leave it off
+for floating or flat objects.
+
+- Every filled part casts. `{cast: false}` on `K.add`, `K.layer` or an `ASSEMBLY` row leaves a part out (wires, glows);
+  `cast: true` lets a line-only part, such as a rod, cast.
+- The ground (z 0, or `ground: z`) receives. `K.receiver?.(F, ring, w)` declares another surface that takes shadows (a
+  sheet of paper, a desk top). Keep the `?.` so the figure still works without the add-on. Thin flat solids on the
+  ground receive by themselves, and a part never shadows a surface in its own `ASSEMBLY` row.
+- `light: [x, y, z]` sets a figure's own light direction. `fitShadow: true` fits the plate round the shadow too.
 
 #### Rules
 
@@ -761,7 +1084,7 @@ kill %1
      the action event and ?mode=turntable.
      Paths: it imports the published kernel from https://linejig.com/kernel/ (keep the import map: the
      kernel imports 'three' and 'three/addons/'). Inside the Linejig source repo, a figure in site/<id>/ may import
-     ../kernel/linejig.js instead. Brand and Dots (Linejig Pro) load from linejig-pro.js by themselves. -->
+     ../kernel/linejig.js instead. Every other style loads its own file by itself. -->
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }

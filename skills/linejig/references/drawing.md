@@ -68,8 +68,19 @@ crease on every cap and four lines on the case rim; it read as noise.)
 | `hi` | the one bright highlight: the part that carries the message (a needle, a key, a door) |
 | dashed | a guide or axis, in `lo` |
 | dot | a small filled dot, in `hi` or `mid` |
+| `ink` | a solid near-black part (`fillTone: 'ink'`): eyes, a pupil, a key's black cap |
 
-One `hi` part per drawing. Contrast must step clearly: `hi` > `edge` > `mid` > `lo` against the plate.
+One `hi` part per drawing.
+
+**Ink.** `fillTone: 'ink'` (on `K.add(..., { fillTone: 'ink' })`, or as the last argument of
+`K.solid(F, rings, w0, w1, silTone, creaseTone, { fillTone: 'ink' })`) fills a part near-black (`--ink`, `#161616`) in
+**both** themes, where `hi` flips light on the dark plate. On the dark plate its lines take `--ink-edge`, a thin step
+lighter (`#6b6c72`), so it reads against `#111111`; on white they are ink too. Every style honours it on any part: it is
+never the hero and never takes the brand colour. Use it for what is black in the real object, sparingly.
+
+**Glow.** A figure may turn its style's hero glow off or down: `glow: false` or `glow: 0..1` in the figure definition,
+or `?glow=0..1`. The default (1) is the style's own glow; line art has none. Turn it off where a large hero would be
+muddied by it. Contrast must step clearly: `hi` > `edge` > `mid` > `lo` against the plate.
 
 ## 6. Palette: white and black, the same for every illustration
 

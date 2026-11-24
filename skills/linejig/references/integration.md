@@ -16,7 +16,7 @@ the address and through messages.
 |---|---|---|
 | Plate (the ground every face is filled with) | the surface the figure sits on: `--card` inside a Card, `--background` on the page, `--muted` in a muted well | `?plate=<light>,<dark>`: two six-digit hex values without `#`, light then dark (defaults `f7f7f8,111111`) |
 | Ink (`hi`, `edge`, `mid`, `lo`) | nothing: keep the kernel's grey ramp | not an address setting |
-| Style | line art, the default; the Brand and Dots styles, with the brand colour from `--primary`, are in the `linejig-pro` skill | nothing to pass |
+| Style | line art, the default, or Brand, Dots, Readout or Pencil with the brand colour from `--primary` once the user confirms it (`SKILL.md`, "Style") | `?style=<id>` and `?brand=<hex>` |
 
 - Tokens are often OKLCH or HSL (`--primary: oklch(0.205 0 0)`). The kernel takes hex, so convert the computed colour
   (in the browser, `getComputedStyle(el).backgroundColor` on an element that uses the token gives `rgb(...)`; turn
@@ -53,7 +53,7 @@ import { useEffect, useRef } from 'react';
 const ORIGIN = 'https://linejig.com';
 const hex = (rgb) => rgb.match(/\d+/g).slice(0, 3).map((n) => (+n).toString(16).padStart(2, '0')).join('');
 
-export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', onAction }) {
+export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', style = 'lineart', brand, onAction }) {
   const ref = useRef(null);
   const dark = () => document.documentElement.classList.contains('dark');
   useEffect(() => {
@@ -70,7 +70,8 @@ export function LinejigFigure({ id, title, plate = 'f7f7f8,111111', onAction }) 
     addEventListener('message', onMessage);
     return () => { removeEventListener('message', onMessage); watch.disconnect(); };
   }, [onAction]);
-  const q = new URLSearchParams({ embed: '1', plate, theme: dark() ? 'dark' : 'light' });
+  const q = new URLSearchParams({ embed: '1', style, plate, theme: dark() ? 'dark' : 'light' });
+  if (brand) q.set('brand', brand.replace('#', ''));
   return <iframe ref={ref} src={`${ORIGIN}/${id}/index.html?${q}`} title={title} loading="lazy"
     style={{ width: '100%', aspectRatio: '5 / 4', border: 0 }} />;
 }

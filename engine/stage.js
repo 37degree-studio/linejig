@@ -59,6 +59,7 @@ export function createStage({ dpr = Math.min(2, devicePixelRatio || 1) } = {}) {
     let again = false;
     for (const p of plates.values()) {
       if (!p.on || !p.w || !p.h) continue;
+      if (!renderer.domElement.width || !renderer.domElement.height) continue;   // the shared canvas is 0 x 0 (every plate hidden, e.g. under a panel): the plate stays dirty and draws once it has a size
       const moved = p.fig.tick();
       if (moved || p.dirty) {
         const vp = { x: 0, y: GH - p.h, w: p.w, h: p.h };      // the plate's frame at the top left of the shared canvas

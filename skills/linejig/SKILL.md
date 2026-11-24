@@ -1,6 +1,6 @@
 ---
 name: linejig
-description: Draws interactive 3D line illustrations in three.js. One object is built from a few rounded solids and drawn as 3D line illustrations in an isometric view (2:1 axonometric) with one fine line width, white and black and hierarchy by tone, so all figures keep a consistent illustration style. It builds in (stack or draw-on), then its one hero part (a needle, a lid, the keys of a keyboard) answers hover and click, and the user can drag to turn and zoom it. Illustration only, with no captions, leader labels, logos or generated images. Use it whenever someone asks for an interactive 3D illustration, a line-art, line-drawn, technical-drawing or isometric object illustration, an animated three.js line drawing, a draw-on or assembly animation, an illustration for an empty state, 404 page, onboarding step, slide or hero, or to add, change or embed a figure from the Linejig gallery, even if they only say "add a drawing here".
+description: Draws interactive 3D line illustrations in three.js. One object is built from a few rounded solids and drawn in an isometric view (2:1 axonometric) with one fine line width, in line art (white and black, hierarchy by tone) or in the Brand, Dots, Readout and Pencil styles, so all figures keep a consistent illustration style. It builds in (stack or draw-on), then its one hero part (a needle, a lid, the keys of a keyboard) answers hover and click, and the user can drag to turn and zoom it. No captions, leader labels, logos or generated images. Use it whenever someone asks for an interactive 3D illustration, a line-art, isometric, halftone, pencil-sketch or brand-colour object illustration, an animated three.js line drawing, a draw-on or assembly animation, an illustration for an empty state, 404 page, onboarding step, slide or hero, or to add, change, restyle or embed a figure from the Linejig gallery, even if they only say "add a drawing here".
 ---
 
 # Linejig
@@ -38,6 +38,8 @@ The user judges the idea before the execution.
 
 ## What stays out
 
+These hold in line art; the styles change only what `## Style` says.
+
 - **No text in the illustration.** No leaders, pointer dots, numbers on parts, captions, headings, labels or "Fig."
   marks. If the host page needs words, they are the page's job, not the drawing's.
 - **No small detail.** No rivets, bands, hatching, engraving, textures, shading, gradients or glow.
@@ -60,17 +62,54 @@ the embed contract, the **action event** (`HERO.action`, posted when the hero's 
 empty state or onboarding step can hand off to its host page) and `?mode=turntable` (no hand, a slow swing for
 loading screens and recorded loops). Import `https://linejig.com/kernel/linejig.js` and link
 `https://linejig.com/kernel/linejig.css`, with the three.js import map, as `scripts/starter.html` does.
-The Brand and Dots styles are Linejig Pro and live in `linejig-pro.js` beside it: the kernel loads that file by itself,
-once, only when a figure asks for brand or dots, so a line-art page never downloads it.
+Every other style is an MIT add-on file beside it (Brand and Dots in `linejig-pro.js`, Readout in `styles/readout.js`,
+Pencil in `styles/pencil.js`): the kernel loads a style's file by itself, once, only when a figure asks for that style,
+so a line-art page never downloads it.
 To see finished figures, open them from the gallery and read their source.
 
 ## Style
 
-This skill draws in **line art** (`references/styles.md`), the kernel's default: white and black only, the grey ramp,
-`hi` for the hero, text-free. The Brand and Dots styles (the hero in a brand colour; the drawing as a dot matrix)
-come with Linejig Pro, the `linejig-pro` skill (https://linejig.com/pricing). If it is installed, follow it for
-those styles; if not, draw in line art. Either way the model, the assembly and the hero are the same, so a figure
-made here works in every style.
+A figure draws in **line art** (`references/styles.md`), the kernel's default: white and black only, the grey ramp,
+`hi` for the hero, text-free. Four more styles restyle the same drawing with one setting; the model, the assembly and
+the hero stay the same, so a figure made in one style works in every style.
+
+1. **Brand** (`references/brand.md`): quiet grey lines, and the hero as a solid part in the user's brand colour
+   (orange `#f5821f` by default) with a soft glow behind it. Short labels may sit engraved on part tops; optionally
+   the object sits in context on a rail with a dashed footprint.
+2. **Dots** (`references/dots.md`): the same drawing as a screen-space dot matrix, tone as dot size, the hero's dots
+   in the brand colour, with a cursor swell.
+3. **Readout** (`references/readout.md`): quiet lines on a dark grained plate, the walls printed with a band of binary
+   digits on one side and the same data as cells on the other, the hero in the brand colour with a soft bloom. Dark-first.
+4. **Pencil** (`references/pencil.md`): the drawing by hand in graphite on the plate as paper, pencil strokes with
+   pressure and overshoot, tone as hatching in each face's plane, the hero in a brand-coloured pencil; silver on dark.
+
+Switch with `style: 'lineart' | 'brand' | 'dots' | 'readout' | 'pencil'` in `createFigure`, `?style=` on a figure page,
+or `{type: 'style', value}` after `ready` (the old names `line` and `accent` still work). Until a style's file arrives
+the figure draws line art, and a figure that opens in another style sends `ready` only once it is in. A page may also
+import the file itself to have the style at once.
+
+### The brand colour
+
+- Brand, Dots, Readout and Pencil take one colour: `brand: { color: '#hex' }`, `?brand=<hex>` (no `#`), or
+  `{type: 'brand', value: '#hex'}` live. The kernel derives every other tone from it; pass it as it is.
+- **Ask for it, never guess.** On a component library (shadcn/ui or any token theme) the primary token (`--primary`)
+  is the likely source, but only once the user confirms it is their brand colour. Convert the computed colour to
+  hex for both themes.
+- The colour goes on the part the message is about (`references/brand.md`, "Which part takes the colour").
+
+### What changes from line art
+
+- **Colour:** white, black, the grey ramp and the one brand colour on the hero. No other colours.
+- **Glow:** only the soft halo behind the hero, in Brand and Readout. None in Dots or Pencil.
+- **Text:** only in Brand, and only short words engraved flat on a part's top face to name that part. Never in
+  Dots, never a caption, a leader or a call to action. Readout's digits are a wall texture, not words.
+- **Hatching:** only in Pencil, as its tone.
+
+### Check the styles
+
+On top of `references/verify.md`: capture every style (`?style=lineart`, `?style=brand`, `?style=dots`,
+`?style=readout` and `?style=pencil`), and in Brand at least one colour besides orange (`?brand=2f6bff`), on both
+plates. On white the hero must read clean and bright, not muddy; on black, not brown. Measure the rendered pixels.
 
 ## The look, in brief
 
@@ -175,7 +214,10 @@ everywhere else, import the published kernel from https://linejig.com/kernel/.
 - `references/metaphors.md`: choosing an object for a message, with an example set.
 - `references/drawing.md`: camera, rounded prisms, painter fill, the one width, the five tones, palettes.
 - `references/motion.md`: moves, timings, springs, draw-on, reduced motion, hand-overs.
-- `references/styles.md`: line art, which part is the hero, the floor grid, and where the Pro styles live.
+- `references/styles.md`: line art, which part is the hero, the floor grid and the shadow.
+- `references/brand.md`: the brand colour and its derived tones, the Brand style, which part takes the colour,
+  recolouring live, and the lesson on muddy colour.
+- `references/dots.md`, `references/readout.md`, `references/pencil.md`: each style and every setting.
 - `references/interaction.md`: the hero part, hover and click responses, orbit, zoom, hit testing, cursors.
 - `references/verify.md`: headless Chrome capture, frozen frames, console errors.
 - `references/integration.md`: on top of a component library (tokens, cards, dark mode), and from the user's own
